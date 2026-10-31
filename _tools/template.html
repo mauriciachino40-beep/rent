@@ -1,0 +1,162 @@
+<title>房租水电账单</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* 布局：单列手机账单——顶部查房号，下方一张缴费单，读数用电表式数字格显示 */
+:root{
+  --bg:#eef2f1; --card:#ffffff; --ink:#1d2a27; --muted:#66756f; --line:#d5dedb;
+  --accent:#1f6b52; --accent-soft:#e1efe9; --digit-bg:#20302b; --digit-fg:#f3f6f4;
+  --warn:#b4432e; --warn-soft:#f7e3de; --ok:#2f7d4f; --ok-soft:#dff0e5;
+  --font:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,"Roboto Mono",monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121816; --card:#1b2421; --ink:#e6ece9; --muted:#93a39d; --line:#2e3a36;
+  --accent:#5cc49a; --accent-soft:#1f3a30; --digit-bg:#0b100e; --digit-fg:#e9f2ee;
+  --warn:#ef8a72; --warn-soft:#3d2520; --ok:#6fd19a; --ok-soft:#1d3a2a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121816; --card:#1b2421; --ink:#e6ece9; --muted:#93a39d; --line:#2e3a36;
+  --accent:#5cc49a; --accent-soft:#1f3a30; --digit-bg:#0b100e; --digit-fg:#e9f2ee;
+  --warn:#ef8a72; --warn-soft:#3d2520; --ok:#6fd19a; --ok-soft:#1d3a2a; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px}
+.wrap{max-width:440px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+h1{font-size:22px;margin:0;text-wrap:balance;letter-spacing:.02em}
+.sub{color:var(--muted);font-size:14px;margin:2px 0 0}
+form.q{display:flex;gap:8px}
+#room{flex:1;min-width:0;font:600 22px var(--mono);letter-spacing:.12em;padding:12px 14px;border:1.5px solid var(--line);
+  border-radius:10px;background:var(--card);color:var(--ink);text-align:center}
+#room:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+button{font:600 17px var(--font);border:0;border-radius:10px;padding:0 22px;background:var(--accent);color:var(--card);cursor:pointer}
+button:focus-visible,.chip:focus-visible{outline:3px solid var(--accent-soft);outline-offset:2px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+.chip{flex:none;font:500 14px var(--font);padding:6px 12px;border-radius:999px;border:1px solid var(--line);
+  background:var(--card);color:var(--muted);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--card)}
+.msg{background:var(--warn-soft);color:var(--warn);padding:12px 14px;border-radius:10px;font-size:15px}
+.bill{background:var(--card);border-radius:14px;border:1px solid var(--line);overflow:hidden}
+.bill-head{display:flex;justify-content:space-between;align-items:flex-end;padding:18px 18px 14px;border-bottom:1px dashed var(--line);gap:12px}
+.lbl{font-size:12px;color:var(--muted);letter-spacing:.08em}
+.roomno{font:700 30px var(--mono);letter-spacing:.06em;line-height:1.1}
+.total{text-align:right}
+.total .amt{font:700 34px var(--mono);color:var(--accent);line-height:1.1;font-variant-numeric:tabular-nums}
+.total .amt small{font-size:18px;margin-right:2px}
+.badge{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;margin-top:6px}
+.badge.ok{background:var(--ok-soft);color:var(--ok)}
+.badge.no{background:var(--warn-soft);color:var(--warn)}
+.rows{padding:6px 18px 12px}
+.row{display:grid;grid-template-columns:1fr auto;gap:4px 12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.row .name{font-weight:600}
+.row .fee{font:600 17px var(--mono);font-variant-numeric:tabular-nums;text-align:right}
+.meter{grid-column:1 / -1;display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.rd{font-size:15px;color:var(--ink);font-variant-numeric:tabular-nums}
+.arrow{color:var(--muted)}
+.calc{grid-column:1 / -1;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.greet{padding:18px 18px 4px;font-size:15px;line-height:1.7;display:flex;flex-direction:column;gap:4px}
+.greet p{margin:0}
+.greet .hi{font-weight:600;font-size:16px}
+.greet b{color:var(--accent)}
+.greet .wish{color:var(--muted);font-size:14px}
+.pay{background:var(--card);border-radius:14px;border:1px solid var(--line);padding:18px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+.qrimg{width:260px;max-width:100%;height:auto;border-radius:10px;display:block}
+.qr{width:200px;max-width:100%;aspect-ratio:1;border:2px dashed var(--line);border-radius:10px;display:grid;place-items:center;color:var(--muted);font-size:14px;padding:12px}
+.pay-t{margin:0;font-size:18px}
+.steps{margin:0;padding-left:1.4em;text-align:left;align-self:stretch;display:flex;flex-direction:column;gap:6px;font-size:15px}
+.steps .big{font-family:var(--mono);color:var(--accent);font-size:18px}
+.steps .alt{color:var(--muted);font-size:13px}
+.tap{margin:-4px 0 0;color:var(--muted);font-size:12px}
+.qrlink{display:block}
+.pay-note{margin:0;color:var(--muted);font-size:13px}
+.foot{color:var(--muted);font-size:13px;text-align:center}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>房租水电账单</h1>
+    <p class="sub">输入你的房间号，查看本月应付金额和水电明细</p>
+  </header>
+
+  <form class="q" id="qform" autocomplete="off">
+    <input id="room" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="例如 101" aria-label="房间号">
+    <button type="submit">查询</button>
+  </form>
+
+  <div class="msg" id="msg" hidden></div>
+  <section class="bill" id="bill" hidden></section>
+
+  <section class="pay" id="pay" hidden>
+    <h2 class="pay-t">付款方式</h2>
+    <ol class="steps">
+      <li>回到微信群，<b>长按</b>房东发的收款码，选择「识别图中二维码」</li>
+      <li>输入金额 <b class="big" id="payamt"></b></li>
+      <li>点「添加备注」，填写房号 <b class="big" id="rmk"></b>，再付款</li>
+    </ol>
+    <p class="pay-note">备注房号才能快速确认是你交的，谢谢配合</p>
+  </section>
+
+  <p class="foot">水电读数有疑问，请联系管理员核对</p>
+</div>
+
+<script>
+const DATA=/*DATA*/[];
+const $=id=>document.getElementById(id);
+const fmt=n=>(Math.round(n*100)/100).toString();
+const rnd=n=>Math.round((n||0)+1e-9);
+const monthName=m=>{const [y,mm]=m.split('.');return `20${y}年${parseInt(mm,10)}月`};
+let cur=DATA.length-1, room='';
+try{room=localStorage.getItem('room')||''}catch(e){}
+$('room').value=room;
+
+function chips(){
+  if(!$('months'))return;
+  const box=$('months');box.innerHTML='';
+  DATA.slice().reverse().forEach((d,ri)=>{
+    const i=DATA.length-1-ri;
+    const b=document.createElement('button');b.type='button';b.className='chip';
+    b.textContent=monthName(d.m);b.setAttribute('aria-pressed',i===cur);
+    b.onclick=()=>{cur=i;chips();render()};box.appendChild(b);
+  });
+}
+function digits(n){return `<span class="rd">${n}</span>`}
+function meterRow(name,unit,price,a,b,fee){
+  const used=b-a;
+  return `<div class="row"><span class="name">${name}</span><span class="fee">¥${fmt(fee)}</span>
+    <div class="meter">上月 ${digits(a)} <span class="arrow">→</span> 本月 ${digits(b)}</div>
+    </div>`;
+}
+function plain(name,fee){return `<div class="row"><span class="name">${name}</span><span class="fee">¥${fmt(fee)}</span></div>`}
+function render(){
+  const msg=$('msg'),bill=$('bill'),pay=$('pay');
+  if(!DATA.length){msg.textContent='暂时还没有账单数据';msg.hidden=false;return}
+  const d=DATA[cur];
+  if(!room){msg.hidden=true;bill.hidden=true;pay.hidden=true;return}
+  const r=d.rooms[room];
+  if(!r){msg.textContent=`${monthName(d.m)}没有找到 ${room} 房的账单，请检查房间号`;msg.hidden=false;bill.hidden=true;pay.hidden=true;return}
+  msg.hidden=true;
+  let rows='';
+  const rent=r.rent||0, gar=r.gar||0;
+  const combo=r.rg!=null && Math.abs(r.rg-(rent+gar))>0.001;
+  rows+=combo?plain('房租（含垃圾费）',r.rg):plain('房租',rent);
+  if(r.w0!=null&&r.w1!=null) rows+=meterRow('水费','吨',d.wp,r.w0,r.w1,r.wf||0);
+  if(r.e0!=null&&r.e1!=null) rows+=meterRow('电费','度',d.ep,r.e0,r.e1,rnd(r.ef));
+  if(r.net) rows+=plain('网络费',r.net);
+  if(!combo && gar) rows+=plain('垃圾费',gar);
+  const badge=d.pay?(r.paid?'<span class="badge ok">已付款</span>':'<span class="badge no">未付款</span>'):'';
+  bill.innerHTML=`<div class="greet"><p class="hi">亲爱的朋友，你好：</p>
+      <p>这是你 <b>${monthName(d.m)}</b> 的房租账单。请在每月 <b>1–5 日</b>内交房租；如有特殊情况，请提前联系管理员说明，我们一起商量解决。</p>
+      <p class="wish">感谢你一直以来的配合，祝生活顺心！</p></div>
+    <div class="bill-head">
+      <div><div class="lbl">${monthName(d.m)} · 房号</div><div class="roomno">${room}</div></div>
+      <div class="total"><div class="lbl">应付合计</div><div class="amt"><small>¥</small>${rnd(r.tot)}</div>${badge}</div>
+    </div><div class="rows">${rows}</div>`;
+  bill.hidden=false;
+  $('rmk').textContent=room;$('payamt').textContent='¥'+rnd(r.tot);pay.hidden=!!r.paid;
+}
+$('qform').addEventListener('submit',e=>{
+  e.preventDefault();room=$('room').value.trim();
+  try{localStorage.setItem('room',room)}catch(err){}
+  render();
+});
+chips();render();
+</script>
