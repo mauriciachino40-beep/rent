@@ -66,12 +66,14 @@ button:focus-visible,.chip:focus-visible{outline:3px solid var(--accent-soft);ou
 .greet b{color:var(--accent)}
 .greet .wish{color:var(--muted);font-size:14px}
 .pay{background:var(--card);border-radius:14px;border:1px solid var(--line);padding:18px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
-.qrimg{width:260px;max-width:100%;height:auto;border-radius:10px;display:block;-webkit-touch-callout:default}
+.qrimg{width:260px;max-width:100%;height:auto;border-radius:10px;display:block}
 .qr{width:200px;max-width:100%;aspect-ratio:1;border:2px dashed var(--line);border-radius:10px;display:grid;place-items:center;color:var(--muted);font-size:14px;padding:12px}
 .pay-t{margin:0;font-size:18px}
 .steps{margin:0;padding-left:1.4em;text-align:left;align-self:stretch;display:flex;flex-direction:column;gap:6px;font-size:15px}
 .steps .big{font-family:var(--mono);color:var(--accent);font-size:18px}
 .steps .alt{color:var(--muted);font-size:13px}
+.tap{margin:-4px 0 0;color:var(--muted);font-size:12px}
+.qrlink{display:block}
 .pay-note{margin:0;color:var(--muted);font-size:13px}
 .foot{color:var(--muted);font-size:13px;text-align:center}
 </style>
@@ -97,11 +99,12 @@ button:focus-visible,.chip:focus-visible{outline:3px solid var(--accent-soft);ou
   <section class="pay" id="pay" hidden>
     <h2 class="pay-t">微信付款</h2>
     <ol class="steps">
-      <li><b>长按</b>下方二维码，选择「识别图中二维码」<br><span class="alt">长按没有这个选项：点「保存图片」，再打开微信「扫一扫」，点右上角相册选这张图</span></li>
+      <li><b>点一下</b>下方二维码打开大图，再<b>长按</b>大图，选择「识别图中二维码」<br><span class="alt">长按没有这个选项：点「保存图片」，再打开微信「扫一扫」，点右上角相册选这张图</span></li>
       <li>输入金额 <b class="big" id="payamt"></b></li>
       <li>点「添加备注」，填写房号 <b class="big" id="rmk"></b>，再付款</li>
     </ol>
-    <img class="qrimg" id="qr" alt="微信收款码" src="qr.jpg">
+    <a href="qr.jpg" class="qrlink"><img class="qrimg" id="qr" alt="微信收款码" src="qr.jpg"></a>
+    <p class="tap">点一下二维码可以打开大图</p>
     <p class="pay-note">备注房号才能快速确认是你交的，谢谢配合</p>
   </section>
 
