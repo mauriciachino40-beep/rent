@@ -97,14 +97,12 @@ button:focus-visible,.chip:focus-visible{outline:3px solid var(--accent-soft);ou
   <section class="bill" id="bill" hidden></section>
 
   <section class="pay" id="pay" hidden>
-    <h2 class="pay-t">微信付款</h2>
+    <h2 class="pay-t">付款方式</h2>
     <ol class="steps">
-      <li><b>长按</b>下方二维码，选择「保存图片」</li>
-      <li>打开微信<b>「扫一扫」</b>，点右上角<b>相册</b>，选刚保存的二维码</li>
+      <li>回到微信群，<b>长按</b>房东发的收款码，选择「识别图中二维码」</li>
       <li>输入金额 <b class="big" id="payamt"></b></li>
       <li>点「添加备注」，填写房号 <b class="big" id="rmk"></b>，再付款</li>
     </ol>
-    <img class="qrimg" id="qr" alt="微信收款码" src="qr.jpg">
     <p class="pay-note">备注房号才能快速确认是你交的，谢谢配合</p>
   </section>
 
