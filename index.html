@@ -147,11 +147,12 @@ function render(){
   msg.hidden=true;
   let rows='';
   const rent=r.rent||0, gar=r.gar||0;
-  if(r.rg!=null && Math.abs(r.rg-(rent+gar))>0.001) rows+=plain('房租（含垃圾费）',r.rg);
-  else{rows+=plain('房租',rent); if(gar) rows+=plain('垃圾费',gar)}
+  const combo=r.rg!=null && Math.abs(r.rg-(rent+gar))>0.001;
+  rows+=combo?plain('房租（含垃圾费）',r.rg):plain('房租',rent);
   if(r.w0!=null&&r.w1!=null) rows+=meterRow('水费','吨',d.wp,r.w0,r.w1,r.wf||0);
   if(r.e0!=null&&r.e1!=null) rows+=meterRow('电费','度',d.ep,r.e0,r.e1,rnd(r.ef));
   if(r.net) rows+=plain('网络费',r.net);
+  if(!combo && gar) rows+=plain('垃圾费',gar);
   const badge=d.pay?(r.paid?'<span class="badge ok">已付款</span>':'<span class="badge no">未付款</span>'):'';
   bill.innerHTML=`<div class="greet"><p class="hi">亲爱的朋友，你好：</p>
       <p>这是你 <b>${monthName(d.m)}</b> 的房租账单。请在每月 <b>1–5 日</b>内交房租；如有特殊情况，请提前联系管理员说明，我们一起商量解决。</p>
